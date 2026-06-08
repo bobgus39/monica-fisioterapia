@@ -17,17 +17,64 @@ const servicios = [
   'Pilates terapéutico',
 ]
 
-const inputStyles = {
+// Label + field con control total sobre el layout — sin depender del sistema
+// de etiquetas flotantes de HeroUI, que se rompe con classNames personalizados
+function Field({ label, required, children }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-gray-400 text-sm font-medium">
+        {label}
+        {required && <span className="text-blue-400 ml-0.5">*</span>}
+      </label>
+      {children}
+    </div>
+  )
+}
+
+const wrapperCls = [
+  'bg-[#0d1520]',
+  'border-[1.5px]',
+  'border-white/10',
+  'data-[hover=true]:border-blue-600/50',
+  'data-[focus=true]:border-blue-500',
+  'rounded-xl',
+  'shadow-none',
+  'h-11',
+]
+
+const inputCls = {
+  inputWrapper: wrapperCls,
+  input: ['text-white', 'text-sm', 'placeholder:text-gray-600'],
+  clearButton: ['text-gray-500'],
+}
+
+const textareaCls = {
   inputWrapper: [
-    'bg-[#111827]',
-    'border',
+    'bg-[#0d1520]',
+    'border-[1.5px]',
     'border-white/10',
-    'hover:border-blue-600/50',
-    'group-data-[focus=true]:border-blue-500',
+    'data-[hover=true]:border-blue-600/50',
+    'data-[focus=true]:border-blue-500',
     'rounded-xl',
+    'shadow-none',
   ],
-  input: ['text-white', 'placeholder:text-gray-600'],
-  label: ['text-gray-400', 'text-sm'],
+  input: ['text-white', 'text-sm', 'placeholder:text-gray-600'],
+}
+
+const selectCls = {
+  trigger: [
+    'bg-[#0d1520]',
+    'border-[1.5px]',
+    'border-white/10',
+    'data-[hover=true]:border-blue-600/50',
+    'data-[open=true]:border-blue-500',
+    'rounded-xl',
+    'shadow-none',
+    'h-11',
+  ],
+  value: ['text-white', 'text-sm'],
+  selectorIcon: ['text-gray-500'],
+  popoverContent: ['bg-[#111827]', 'border', 'border-white/10', 'rounded-xl', 'shadow-xl'],
 }
 
 export default function Formulario() {
@@ -40,7 +87,7 @@ export default function Formulario() {
     fecha: '',
     mensaje: '',
   })
-  const [status, setStatus] = useState('idle') // idle | loading | success | error
+  const [status, setStatus] = useState('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
   const update = (field) => (val) => setForm((f) => ({ ...f, [field]: val }))
@@ -66,14 +113,15 @@ export default function Formulario() {
 
   return (
     <section id="reservar" className="section-padding bg-[#070910] relative overflow-hidden">
-      <div className="absolute inset-0" style={{
-        backgroundImage: 'radial-gradient(circle at 70% 50%, rgba(37,99,235,0.08) 0%, transparent 60%)',
-      }} />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ backgroundImage: 'radial-gradient(circle at 70% 50%, rgba(37,99,235,0.08) 0%, transparent 60%)' }}
+      />
 
       <div className="max-w-5xl mx-auto" ref={ref}>
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
 
-          {/* Left — info */}
+          {/* Columna izquierda — info */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={isVisible ? { opacity: 1, x: 0 } : {}}
@@ -108,7 +156,7 @@ export default function Formulario() {
             </div>
           </motion.div>
 
-          {/* Right — form */}
+          {/* Columna derecha — formulario */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={isVisible ? { opacity: 1, x: 0 } : {}}
@@ -137,86 +185,83 @@ export default function Formulario() {
             ) : (
               <form
                 onSubmit={handleSubmit}
-                className="rounded-2xl border border-white/5 bg-gradient-to-br from-[#111827] to-[#0a0f1e] p-6 md:p-8 space-y-5"
+                className="rounded-2xl border border-white/5 bg-gradient-to-br from-[#111827] to-[#0a0f1e] p-6 md:p-8 space-y-4"
               >
-                {/* Row 1 */}
+                {/* Nombre + Teléfono */}
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <Input
-                    label="Nombre completo"
-                    labelPlacement="outside"
-                    placeholder="Tu nombre"
-                    value={form.nombre}
-                    onValueChange={update('nombre')}
-                    isRequired
-                    classNames={inputStyles}
-                  />
-                  <Input
-                    label="Teléfono"
-                    labelPlacement="outside"
-                    placeholder="+34 XXX XXX XXX"
-                    type="tel"
-                    value={form.telefono}
-                    onValueChange={update('telefono')}
-                    isRequired
-                    classNames={inputStyles}
-                  />
+                  <Field label="Nombre completo" required>
+                    <Input
+                      placeholder="Tu nombre"
+                      value={form.nombre}
+                      onValueChange={update('nombre')}
+                      classNames={inputCls}
+                    />
+                  </Field>
+                  <Field label="Teléfono" required>
+                    <Input
+                      placeholder="+34 XXX XXX XXX"
+                      type="tel"
+                      value={form.telefono}
+                      onValueChange={update('telefono')}
+                      classNames={inputCls}
+                    />
+                  </Field>
                 </div>
 
-                {/* Row 2 */}
-                <Input
-                  label="Email"
-                  labelPlacement="outside"
-                  placeholder="tu@email.com"
-                  type="email"
-                  value={form.email}
-                  onValueChange={update('email')}
-                  isRequired
-                  classNames={inputStyles}
-                />
+                {/* Email */}
+                <Field label="Email" required>
+                  <Input
+                    placeholder="tu@email.com"
+                    type="email"
+                    value={form.email}
+                    onValueChange={update('email')}
+                    classNames={inputCls}
+                  />
+                </Field>
 
-                {/* Row 3 */}
-                <Select
-                  label="Tratamiento de interés"
-                  labelPlacement="outside"
-                  placeholder="Selecciona un tratamiento"
-                  selectedKeys={form.servicio ? new Set([form.servicio]) : new Set()}
-                  onSelectionChange={(keys) => update('servicio')([...keys][0] || '')}
-                  isRequired
-                  classNames={{
-                    trigger: ['bg-[#111827]', 'border', 'border-white/10', 'hover:border-blue-600/50', 'rounded-xl'],
-                    value: ['text-white'],
-                    label: ['text-gray-400', 'text-sm'],
-                    popoverContent: ['bg-[#111827]', 'border', 'border-white/10'],
-                  }}
-                >
-                  {servicios.map((s) => (
-                    <SelectItem key={s} className="text-white hover:bg-blue-600/20">
-                      {s}
-                    </SelectItem>
-                  ))}
-                </Select>
+                {/* Tratamiento */}
+                <Field label="Tratamiento de interés" required>
+                  <Select
+                    placeholder="Selecciona un tratamiento"
+                    selectedKeys={form.servicio ? new Set([form.servicio]) : new Set()}
+                    onSelectionChange={(keys) => update('servicio')([...keys][0] || '')}
+                    classNames={selectCls}
+                  >
+                    {servicios.map((s) => (
+                      <SelectItem
+                        key={s}
+                        classNames={{ base: ['text-gray-200', 'data-[hover=true]:bg-blue-600/20', 'rounded-lg'] }}
+                      >
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </Field>
 
-                {/* Row 4 */}
-                <Input
-                  label="Fecha preferida"
-                  labelPlacement="outside"
-                  type="date"
-                  value={form.fecha}
-                  onValueChange={update('fecha')}
-                  classNames={inputStyles}
-                />
+                {/* Fecha */}
+                <Field label="Fecha preferida">
+                  <Input
+                    type="date"
+                    value={form.fecha}
+                    onValueChange={update('fecha')}
+                    classNames={{
+                      ...inputCls,
+                      input: ['text-white', 'text-sm', 'placeholder:text-gray-600', '[color-scheme:dark]'],
+                    }}
+                  />
+                </Field>
 
-                {/* Row 5 */}
-                <Textarea
-                  label="Mensaje adicional (opcional)"
-                  labelPlacement="outside"
-                  placeholder="Cuéntanos brevemente tu situación o cualquier consulta..."
-                  value={form.mensaje}
-                  onValueChange={update('mensaje')}
-                  minRows={3}
-                  maxRows={5}
-                  classNames={inputStyles}
-                />
+                {/* Mensaje */}
+                <Field label="Mensaje adicional (opcional)">
+                  <Textarea
+                    placeholder="Cuéntanos brevemente tu situación o cualquier consulta..."
+                    value={form.mensaje}
+                    onValueChange={update('mensaje')}
+                    minRows={3}
+                    maxRows={5}
+                    classNames={textareaCls}
+                  />
+                </Field>
 
                 {status === 'error' && (
                   <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
@@ -228,14 +273,16 @@ export default function Formulario() {
                   type="submit"
                   size="lg"
                   isLoading={status === 'loading'}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base"
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base mt-2"
                 >
                   {status === 'loading' ? 'Enviando...' : 'Solicitar cita'}
                 </Button>
 
                 <p className="text-gray-600 text-xs text-center">
                   Al enviar este formulario aceptas nuestra{' '}
-                  <span className="text-gray-500 cursor-pointer hover:text-gray-400">política de privacidad</span>.
+                  <span className="text-gray-500 cursor-pointer hover:text-gray-400">
+                    política de privacidad
+                  </span>.
                 </p>
               </form>
             )}
